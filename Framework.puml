@@ -1,0 +1,59 @@
+@startuml
+title WGPU Framework
+
+queue <--- CommandEncoder
+
+class device
+class queue
+class surface
+
+class Swapchain
+
+class CommandEncoder {
+    CommandBuffer
+    CommandPool
+}
+
+class RenderPass {
+    +SetPipeline()
+    +SetVertexBuffer()
+    +SetBindGroup()
+    +DrawIndex()
+}
+
+enum Memory {
+    image
+    imageView
+    memory
+    sampler
+}
+
+class Shader {
+    vertex
+    fragment
+}
+
+class BindGroup {
+    Entries
+    EntryLayouts
+}
+
+class Pipeline {
+    ShaderModule
+    Primitive
+    Scissor
+    Rasterization
+    Stencil
+    BindGroupLayout
+}
+
+
+class Buffer {
+    VertextBuffer
+    IndexBuffer
+    UniformBuffer
+    FrameBuffer
+    StageBuffer
+    StorageBuffer
+}
+@enduml

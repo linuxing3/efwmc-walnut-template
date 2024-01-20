@@ -1,5 +1,7 @@
 # A Simple C++ Gui Application Framework with wgpu
 
+![Framework](Framework.png)
+
 ## How to use
 
 ```sh

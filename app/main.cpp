@@ -153,13 +153,14 @@ public:
   }
 
   void Render() {
+    if (m_ViewportWidth <= 0 && m_ViewportHeight <= 0)
+      return;
+
     Timer timer;
 
-    if (m_ViewportWidth > 0 && m_ViewportHeight > 0) {
-      m_Renderer.OnResize(m_ViewportWidth, m_ViewportHeight);
-      m_Camera.OnResize(m_ViewportWidth, m_ViewportHeight);
-      m_Renderer.Render(m_Scene, m_Camera);
-    }
+    m_Renderer.OnResize(m_ViewportWidth, m_ViewportHeight);
+    m_Camera.OnResize(m_ViewportWidth, m_ViewportHeight);
+    m_Renderer.Render(m_Scene, m_Camera);
 
     m_LastRenderTime = timer.ElapsedMillis();
   }
@@ -178,6 +179,8 @@ int main(int argc, char **) {
   ApplicationSpecification spec;
   spec.Name = "Walnut Example";
   spec.CustomTitlebar = true;
+  spec.Width = 945;
+  spec.Height = 1028;
   auto *app = new Application(spec);
 
   // NOTE:
