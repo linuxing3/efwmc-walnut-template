@@ -130,7 +130,7 @@ void Renderer::LoadScene() {
     
   } break;
   case Scenes::Box3: {
-    Camera::CameraOrientation orientation{point3(0, 0, 13), point3(0, 0, 0), vec3(0, 1, 0)};
+    Camera::CameraOrientation orientation{point3(0, 0, 3), point3(0, 0, 0), vec3(0, 1, 0)};
 
     const auto lookDir = orientation.lookfrom - orientation.lookat;
     const auto dist_to_focus = std::sqrt(glm::dot(lookDir, lookDir));

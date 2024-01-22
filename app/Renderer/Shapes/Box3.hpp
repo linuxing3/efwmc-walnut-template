@@ -8,6 +8,8 @@
 #include "Renderer/Utils.h"
 #include <optional>
 
+template <typename T> int sign(T val) { return (T(0) < val) - (val < T(0)); }
+
 // NOTE: like AABB
 using namespace std;
 
@@ -36,7 +38,7 @@ public:
   [[nodiscard]] float FastHit(const Ray &r, const float _tmin,
                               const float _tmax) const {
 
-    float tmin = _tmin, tmax = _tmax;
+    float tmin, tmax;
     float tymin, tymax, tzmin, tzmax;
 
     tmin = (bounds[r.sign[0]].x - r.origin.x) * r.inverseDirection.x;
@@ -46,7 +48,7 @@ public:
     tymax = (bounds[1 - r.sign[1]].y - r.origin.y) * r.inverseDirection.y;
 
     if ((tmin > tymax) || (tymin > tmax))
-      return false;
+      return numeric_limits<float>::max();
     if (tymin > tmin)
       tmin = tymin;
     if (tymax < tmax)
@@ -62,21 +64,25 @@ public:
     if (tzmax < tmax)
       tmax = tzmax;
 
-    return tmin;
+    float root = tmin;
+
+    return root;
   };
 
   [[nodiscard]] HitRecord ComputeHitRecord(const Ray &r, const float t) const {
     HitRecord result{};
     result.t = t;
     result.p = r.At(result.t);
-    vec3 outward_normal = glm::normalize(result.p - r.origin);
+    // FIXME: normal as color
+    vec3 outward_normal = glm::normalize(result.p - center);
+    outward_normal *= sign(1.0);
     result.SetFaceNormal(r, outward_normal);
 
     return result;
   };
 
   [[nodiscard]] optional<HitRecord> Hit(const Ray &r, const float tmin,
-                                             const float tmax) const {
+                                        const float tmax) const {
     static constexpr optional<HitRecord> empty_result{};
     if (const auto t = FastHit(r, tmin, tmax);
         t < numeric_limits<float>::max()) {
@@ -90,8 +96,11 @@ public:
   Box3(const point3 &vmin, const point3 &vmax) {
     bounds[0] = vmin;
     bounds[1] = vmax;
+    center = point3((vmax.x - vmin.x) / 2, (vmax.y - vmin.y) / 2,
+                    (vmax.z - vmax.z) / 2);
   }
   point3 bounds[2];
+  point3 center;
 };
 } // namespace RTIAW::Render::Shapes
 #endif
