@@ -10,13 +10,17 @@
 
 template <typename T> int sign(T val) { return (T(0) < val) - (val < T(0)); }
 
+static float CUBEVERTICES[] = {-0.5f, -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,
+                    0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,
+
+                    -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f,
+                    0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f};
 // NOTE: like AABB
 using namespace std;
 
 /**
  *
 BOX中只有两个对象，一个是盒子的左下角坐标，另一个是右上角坐标。
-
 */
 
 namespace RTIAW::Render::Shapes {
@@ -75,7 +79,9 @@ public:
     result.p = r.At(result.t);
     // FIXME: normal as color
     vec3 outward_normal = glm::normalize(result.p - center);
-    outward_normal *= sign(1.0);
+    float sign = glm::dot(outward_normal, result.p - center);
+    outward_normal *= sign;
+
     result.SetFaceNormal(r, outward_normal);
 
     return result;
@@ -98,9 +104,18 @@ public:
     bounds[1] = vmax;
     center = point3((vmax.x - vmin.x) / 2, (vmax.y - vmin.y) / 2,
                     (vmax.z - vmax.z) / 2);
+
+    // Loop through original data and copy to 2D array
+    // for (int i = 0; i < 8; i++) {
+    //   points[i][0] = CUBEVERTICES[i * 3];
+    //   points[i][1] = CUBEVERTICES[i * 3 + 1];
+    //   points[i][2] = CUBEVERTICES[i * 3 + 2];
+    // }
   }
   point3 bounds[2];
   point3 center;
+  // point3 points[8];
+  // Original cube vertex data
 };
 } // namespace RTIAW::Render::Shapes
 #endif

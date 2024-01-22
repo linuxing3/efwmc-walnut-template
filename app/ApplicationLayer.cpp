@@ -12,19 +12,15 @@
 #include <stdint.h>
 
 #include "ApplicationLayer.h"
+#include "Renderer/Shapes/Rectangle.h"
 
 using namespace RTIAW::Render::Shapes;
 namespace RTIAW {
 ApplicationLayer::ApplicationLayer()
     : m_logger{spdlog::stdout_color_st("ApplicationLayer")} {
-  // FIXME: remove after debugging
   spdlog::set_level(spdlog::level::debug);
 
-  // TODO: later on let this be picked in a ImGui dropdown maybe?
   m_renderer.SetScene(RTIAW::Render::Renderer::Scenes::OneSphereScene);
-  //   m_renderer.SetScene(RTIAW::Render::Renderer::Scenes::TestScene);
-  // m_renderer.SetScene(RTIAW::Render::Renderer::Scenes::ThreeSpheres);
-  //   m_renderer.SetScene(RTIAW::Render::Renderer::Scenes::DefaultScene);
 }
 
 void ApplicationLayer::OnUIRenderT() {}
@@ -122,14 +118,16 @@ void ApplicationLayer::OnUIRender() {
   ImGui::Text("Last render: %.3fms", m_renderer.lastRenderTime);
   ImGui::Separator();
 
-  //   auto objects = m_renderer.getScene().GetObjects();
-  //   for (uint32_t i = 0; i < objects.size(); i++) {
-  //     ImGui::PushID(i);
-  //     Sphere sphere = std::get<Sphere>(objects[i].GetShape());
-  //     ImGui::DragFloat3("Position", glm::value_ptr(sphere.m_center), 0.1f);
-  //     ImGui::DragFloat("Radius", &sphere.m_radius, 0.1f);
-  //     ImGui::PopID();
-  //   }
+  auto objects = m_renderer.getScene().GetObjects();
+  for (uint32_t i = 0; i < objects.size(); i++) {
+    ImGui::PushID(i);
+    /* Sphere sphere = std::get<Sphere>(objects[i].GetShape()); */
+    /* ImGui::DragFloat3("Position", glm::value_ptr(sphere.m_center), 0.1f); */
+    /* ImGui::DragFloat("Radius", &sphere.m_radius, 0.1f); */
+    /* Rectangle rect = std::get<Rectangle>(objects[i].GetShape()); */
+    /* ImGui::DragFloat3("Position", glm::value_ptr(rect.center), 0.1f); */
+    ImGui::PopID();
+  }
 
   ImGui::End();
 }
