@@ -111,11 +111,14 @@ void ApplicationLayer::OnUIRender() {
   }
 
   ImGui::DragFloat3("Camera Position", glm::value_ptr(m_renderer.lookfrom),
-                    0.1f);
-  ImGui::DragFloat3("Camera LookAt", glm::value_ptr(m_renderer.lookat), 0.1f);
-  ImGui::DragFloat3("Base Color", glm::value_ptr(m_renderer.material_color),
-                    0.1f);
+                    0.1f, -30.f, 30.0f);
+  ImGui::DragFloat3("Camera LookAt", glm::value_ptr(m_renderer.lookat), 0.0f,
+                    -100.0f, 100.0f);
 
+  ImGui::DragFloat3("Base Color", glm::value_ptr(m_renderer.material_color),
+                    0.1f, 0.0f, 1.0f);
+
+  ImGui::DragFloat("Scale", &m_renderer.scale, 0.1f, 0.0f, 100.0f);
   ImGui::End();
 
   // --------------------------------------------------------------

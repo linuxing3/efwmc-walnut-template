@@ -19,6 +19,7 @@ public:
   point3 lookat{0.0f, 0.0f, 0.0f};
   point3 material_color{0.8f, 0.2f, 0.1f};
   float aperture = 0.1f;
+  float scale = 2.0f;
   enum class RenderState { Ready, Running, Finished, Stopped };
   enum class Scenes {
     DefaultScene,

@@ -192,11 +192,14 @@ void Renderer::LoadScene() {
     static int CUBEINDEX[6][3] = {
         {0, 1, 3}, {1, 2, 5}, {2, 3, 6}, {0, 3, 4}, {4, 5, 7}, {4, 0, 5},
     };
+
+    // TODO: mvp matrix
+
     for (int i = 0; i < 6; i++) {
       m_scene.Add(Shapes::Rectangle({
-                      points[CUBEINDEX[i][0]],
-                      points[CUBEINDEX[i][1]],
-                      points[CUBEINDEX[i][2]],
+                      scale * points[CUBEINDEX[i][0]],
+                      scale * points[CUBEINDEX[i][1]],
+                      scale * points[CUBEINDEX[i][2]],
                   }),
                   material);
     }
