@@ -189,9 +189,17 @@ void Renderer::LoadScene() {
       points[i].z = CUBEVERTICES[i * 3 + 2];
     }
 
-    m_scene.Add(Shapes::Rectangle({points[0], points[1], points[3]}), material);
-    m_scene.Add(Shapes::Rectangle({points[1], points[2], points[5]}), material);
-    m_scene.Add(Shapes::Rectangle({points[2], points[3], points[6]}), material);
+    static int CUBEINDEX[6][3] = {
+        {0, 1, 3}, {1, 2, 5}, {2, 3, 6}, {0, 3, 4}, {4, 5, 7}, {4, 0, 5},
+    };
+    for (int i = 0; i < 6; i++) {
+      m_scene.Add(Shapes::Rectangle({
+                      points[CUBEINDEX[i][0]],
+                      points[CUBEINDEX[i][1]],
+                      points[CUBEINDEX[i][2]],
+                  }),
+                  material);
+    }
 
     auto plane_material = Materials::Lambertian(color(0.6, 0.6, 0.6));
     m_scene.Add(Shapes::Plane(point3(0.0, -1.2, 0.0), glm::vec3(0.0, 1.0, 0.0)),

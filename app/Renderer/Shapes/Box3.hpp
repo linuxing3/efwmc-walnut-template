@@ -11,10 +11,10 @@
 template <typename T> int sign(T val) { return (T(0) < val) - (val < T(0)); }
 
 static float CUBEVERTICES[] = {-0.5f, -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,
-                    0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,
+                               0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,
 
-                    -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f,
-                    0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f};
+                               -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f,
+                               0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f};
 // NOTE: like AABB
 using namespace std;
 
@@ -77,7 +77,7 @@ public:
     HitRecord result{};
     result.t = t;
     result.p = r.At(result.t);
-    // FIXME: normal as color
+
     vec3 outward_normal = glm::normalize(result.p - center);
     float sign = glm::dot(outward_normal, result.p - center);
     outward_normal *= sign;
