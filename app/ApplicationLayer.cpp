@@ -43,7 +43,6 @@ void ApplicationLayer::OnUIRender() {
   uint32_t imy = 400;
 
   auto sizeAvailable = ImGui::GetContentRegionAvail();
-  // FIXME: initial size zero?
   if (sizeAvailable.x != 0 && sizeAvailable.y != 0) {
     imx = sizeAvailable.x;
     imy = sizeAvailable.y;
@@ -68,6 +67,7 @@ void ApplicationLayer::OnUIRender() {
   ImGui::End();
   ImGui::PopStyleVar(2);
 
+  // --------------------------------------------------------------
   ImGui::Begin("Controls");
   // TODO: change this if/when we'll support multiple scenes
   // ImGui::Text(fmt::format("Scene: {}",
@@ -109,7 +109,16 @@ void ApplicationLayer::OnUIRender() {
       m_renderer.StopRender();
     }
   }
+
+  ImGui::DragFloat3("Camera Position", glm::value_ptr(m_renderer.lookfrom),
+                    0.1f);
+  ImGui::DragFloat3("Camera LookAt", glm::value_ptr(m_renderer.lookat), 0.1f);
+  ImGui::DragFloat3("Base Color", glm::value_ptr(m_renderer.material_color),
+                    0.1f);
+
   ImGui::End();
+
+  // --------------------------------------------------------------
 
   ImGui::Begin("Render Settings");
   ImGui::DragInt("Samples", (int *)&m_renderer.samplesPerPixel, 1, 1, 10);
@@ -130,5 +139,6 @@ void ApplicationLayer::OnUIRender() {
   }
 
   ImGui::End();
+  // --------------------------------------------------------------
 }
 } // namespace RTIAW

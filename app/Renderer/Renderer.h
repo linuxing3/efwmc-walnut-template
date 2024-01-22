@@ -15,14 +15,25 @@ namespace RTIAW::Render {
 
 class Renderer {
 public:
+  point3 lookfrom{10.0f, 10.0f, 10.0f};
+  point3 lookat{0.0f, 0.0f, 0.0f};
+  point3 material_color{0.8f, 0.2f, 0.1f};
+  float aperture = 0.1f;
   enum class RenderState { Ready, Running, Finished, Stopped };
-  enum class Scenes { DefaultScene, ThreeSpheres, TestScene, OneSphereScene, RectangleScene, Box3 };
+  enum class Scenes {
+    DefaultScene,
+    ThreeSpheres,
+    TestScene,
+    OneSphereScene,
+    RectangleScene,
+    Cube
+  };
 
   Renderer() : m_logger{spdlog::stdout_color_st("Renderer")} {}
   Renderer(const Renderer &) = delete;
   ~Renderer();
 
-  HittableObjectList getScene() { return m_scene;};
+  HittableObjectList getScene() { return m_scene; };
   void SetImageSize(unsigned int x, unsigned int y);
   void SetScene(Scenes scene = Scenes::DefaultScene) { m_sceneType = scene; };
 
@@ -34,13 +45,15 @@ public:
 
   [[nodiscard]] Scenes Scene() const { return m_sceneType; }
   [[nodiscard]] RenderState State() const { return m_state; }
-  [[nodiscard]] const void *ImageBuffer() const { return m_renderBuffer.empty() ? nullptr : m_renderBuffer.data(); }
+  [[nodiscard]] const void *ImageBuffer() const {
+    return m_renderBuffer.empty() ? nullptr : m_renderBuffer.data();
+  }
 
   unsigned int samplesPerPixel = 10;
   unsigned int maxRayDepth = 10;
   unsigned int lastRenderTimeMS = 0;
   float lastRenderTime = 0.0f;
-  
+
 private:
   std::shared_ptr<spdlog::logger> m_logger;
 
@@ -71,14 +84,16 @@ private:
   // actual internal implementation
   void Render();
   color ShootRay(const Ray &ray, unsigned int depth);
-  void WritePixelToBuffer(unsigned int ix, unsigned int iy, unsigned int samples_per_pixel, color pixel_color);
+  void WritePixelToBuffer(unsigned int ix, unsigned int iy,
+                          unsigned int samples_per_pixel, color pixel_color);
 
   // rng stuff
   std::mt19937 m_rnGenerator{};
   std::uniform_real_distribution<float> m_unifDistribution{0.0f, 1.0f};
 
   [[nodiscard]] float AspectRatio() const {
-    return static_cast<float>(m_imageSize.x) / static_cast<float>(m_imageSize.y);
+    return static_cast<float>(m_imageSize.x) /
+           static_cast<float>(m_imageSize.y);
   }
 };
 } // namespace RTIAW::Render

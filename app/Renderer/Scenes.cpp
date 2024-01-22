@@ -165,18 +165,17 @@ void Renderer::LoadScene() {
         material);
 
   } break;
-  case Scenes::Box3: {
-    Camera::CameraOrientation orientation{point3(10, 10, 10), point3(0, 0, 0),
-                                          vec3(0, 1, 0)};
+  case Scenes::Cube: {
+
+    // NOTE: default Camera
+    Camera::CameraOrientation orientation{lookfrom, lookat, vec3(0, 1, 0)};
 
     const auto lookDir = orientation.lookfrom - orientation.lookat;
     const auto dist_to_focus = std::sqrt(glm::dot(lookDir, lookDir));
-    constexpr auto aperture = 0.1f;
 
     m_camera = std::make_unique<Camera>(orientation, 20.0f, AspectRatio(),
                                         aperture, dist_to_focus);
-
-    auto material = Materials::Lambertian(color(0.8, 0.2, 0.1));
+    auto material = Materials::Lambertian(material_color);
 
     static float CUBEVERTICES[] = {-0.5f, -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,
                                    0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,
