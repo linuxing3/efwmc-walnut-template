@@ -3,6 +3,7 @@ title WGPU Framework
 
 queue <--- CommandEncoder
 
+class gpu
 class device
 class queue
 class surface
