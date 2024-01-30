@@ -27,12 +27,13 @@ static uint32_t ConvertToRGBA(const glm::vec4 &color) {
   return result;
 }
 
-static void WriteColors(std::vector<uint8_t> m_renderBuffer, unsigned int idx,
-                        color pixel_color) {
-  m_renderBuffer[idx] = static_cast<uint8_t>(255.0f * pixel_color.r);
-  m_renderBuffer[idx + 1] = static_cast<uint8_t>(255.0f * pixel_color.g);
-  m_renderBuffer[idx + 2] = static_cast<uint8_t>(255.0f * pixel_color.b);
-  m_renderBuffer[idx + 3] = 255.0f;
+static color ConvertColor(color pixel_color) {
+
+  auto r = static_cast<uint8_t>(255.0f * pixel_color.r);
+  auto g = static_cast<uint8_t>(255.0f * pixel_color.g);
+  auto b = static_cast<uint8_t>(255.0f * pixel_color.b);
+  color result{r, g, b};
+  return result;
 }
 
 Renderer::~Renderer() {
@@ -203,8 +204,13 @@ void Renderer::WritePixelToBuffer(unsigned int ix, unsigned int iy,
   pixel_color = glm::sqrt(pixel_color);
   pixel_color = glm::clamp(pixel_color, 0.0f, 1.0f);
 
-  unsigned int idx = 4 * (ix + iy * m_imageSize.x);
-  WriteColors(m_renderBuffer, idx, pixel_color);
+  const unsigned int idx = 4 * (ix + iy * m_imageSize.x);
+  const auto new_color = ConvertColor(pixel_color);
+
+  m_renderBuffer[idx] = new_color.r;
+  m_renderBuffer[idx + 1] = new_color.g;
+  m_renderBuffer[idx + 2] = new_color.b;
+  m_renderBuffer[idx + 3] = 255;
 };
 
 } // namespace RTIAW::Render
