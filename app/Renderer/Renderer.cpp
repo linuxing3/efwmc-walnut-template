@@ -88,8 +88,7 @@ std::vector<Renderer::Quad> Renderer::SplitImage(unsigned int quadSize) const {
 
 void Renderer::Render() {
   m_logger->debug("Start rendering!!!");
-  const auto startTime = std::chrono::system_clock::now();
-
+  timer = new Walnut::Timer();
   m_state = RenderState::Running;
 
 #ifdef RENDER_PERLINE
@@ -164,8 +163,6 @@ void Renderer::Render() {
   std::for_each(begin(futures), end(futures),
                 [](auto &future) { future.wait(); });
 
-  Walnut::Timer timer;
-  lastRenderTime = timer.ElapsedMillis();
   m_state = RenderState::Finished;
 }
 

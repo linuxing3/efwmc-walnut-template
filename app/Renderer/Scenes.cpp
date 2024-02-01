@@ -1,6 +1,10 @@
+#include <cmath>
 #include <glm/ext/matrix_float4x4.hpp>
+#include <glm/ext/quaternion_geometric.hpp>
+#include <glm/ext/quaternion_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/gtc/random.hpp>
+#include <glm/trigonometric.hpp>
 
 #include "Renderer/Materials/Dielectric.h"
 #include "Renderer/Materials/Lambertian.h"
@@ -9,6 +13,7 @@
 #include "Renderer/Shapes/Rectangle.h"
 #include "Renderer/Shapes/Sphere.h"
 #include "Renderer/Utils.h"
+#include "Walnut/Timer.h"
 
 namespace RTIAW::Render {
 void Renderer::LoadScene() {
@@ -184,12 +189,17 @@ void Renderer::LoadScene() {
                                    -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f,
                                    0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f};
 
+    // make the cube rotate according mvp matrix while time collapsed
+    lastRenderTime = timer->ElapsedMillis();
+
     point3 points[8];
     for (int i = 0; i < 8; i++) {
       points[i].x = CUBEVERTICES[i * 3];
       points[i].y = CUBEVERTICES[i * 3 + 1];
       points[i].z = CUBEVERTICES[i * 3 + 2];
-      points[i] = glm::vec3(mvp * glm::vec4(points[i], 1.0f));
+      // NOTE: update with mvp
+      points[i] = glm::vec3(mvp.projection * mvp.view * mvp.model *
+                            glm::vec4(points[i], 1.0f));
     }
 
     static int CUBEINDEX[6][3] = {

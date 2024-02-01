@@ -112,11 +112,23 @@ void ApplicationLayer::OnUIRender() {
   }
 
   // TODO: mvp matrix to update vertex coordinates
-  ImGui::DragFloat3("mvp1", value_ptr(m_renderer.mvp[0]), 0.1f, -1.0f, 1.0f);
-  ImGui::DragFloat3("mvp2", value_ptr(m_renderer.mvp[1]), 0.1f, -1.0f, 1.0f);
-  ImGui::DragFloat3("mvp3", value_ptr(m_renderer.mvp[2]), 0.1f, -1.0f, 1.0f);
-  ImGui::DragFloat3("mvp4", value_ptr(m_renderer.mvp[3]), 0.1f, -1.0f, 1.0f);
+  ImGui::DragFloat3("translate x", value_ptr(m_renderer.mvp.model[0]), 0.1f,
+                    -1.0f, 1.0f);
+  ImGui::DragFloat3("translate y", value_ptr(m_renderer.mvp.model[1]), 0.1f,
+                    -1.0f, 1.0f);
+  ImGui::DragFloat3("translate z", value_ptr(m_renderer.mvp.model[2]), 0.1f,
+                    -1.0f, 1.0f);
 
+  ImGui::DragFloat3("view x", value_ptr(m_renderer.mvp.view[0]), 0.1f, -1.0f,
+                    1.0f);
+  ImGui::DragFloat3("view y", value_ptr(m_renderer.mvp.view[1]), 0.1f, -1.0f,
+                    1.0f);
+  ImGui::DragFloat3("view z", value_ptr(m_renderer.mvp.view[2]), 0.1f, -1.0f,
+                    1.0f);
+
+  // TODO: mvp matrix to update vertex coordinates
+
+  // camera position
   ImGui::DragFloat3("Camera Position", glm::value_ptr(m_renderer.lookfrom),
                     0.1f, -30.f, 30.0f);
   ImGui::DragFloat3("Camera LookAt", glm::value_ptr(m_renderer.lookat), 0.0f,

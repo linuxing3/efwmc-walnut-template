@@ -8,6 +8,7 @@
 #include "Renderer/HittableObjectList.h"
 #include "Renderer/ThreadPool.h"
 #include "Renderer/Utils.h"
+#include "Walnut/Timer.h"
 
 #include <random>
 
@@ -30,7 +31,15 @@ public:
     Cube
   };
 
-  glm::mat4x4 mvp{1.0f};
+  Walnut::Timer *timer;
+  // define a mvp struct holds all the mvp matrices
+  struct MVP {
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 view = glm::mat4(1.0f);
+    glm::mat4 projection = glm::mat4(1.0f);
+  };
+
+  MVP mvp;
 
   Renderer() : m_logger{spdlog::stdout_color_st("Renderer")} {}
   Renderer(const Renderer &) = delete;
