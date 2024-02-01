@@ -31,7 +31,6 @@ private:
   float m_lensRadius{0.5f};
 
   point3 m_origin{0, 0, 0};
-  point3 m_ForwardDirection{0.0f, 0.0f, 0.0f};
 
   vec3 m_horizontal;
   vec3 m_vertical;

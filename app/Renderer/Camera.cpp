@@ -35,7 +35,7 @@ Camera::Camera(CameraOrientation orientation, float verticalFov,
 
   m_origin = orientation.lookfrom;
   // FIXME:
-  m_ForwardDirection = normalize(orientation.lookat - orientation.lookfrom);
+  w = normalize(orientation.lookat - orientation.lookfrom);
 
   m_horizontal = focusDist * m_viewportWidth * u;
   m_vertical = focusDist * m_viewportHeight * v;
@@ -52,6 +52,7 @@ Ray Camera::NewRay(float s, float t) const {
                                     t * m_vertical - m_origin - offset);
 }
 
+// FIXME: this is a hack, should be in ApplicationLayer
 bool Camera::OnUpdate(float ts) {
   vec2 mousePos = Input::GetMousePosition();
   vec2 delta = (mousePos - m_LastMousePosition) * 0.002f;
@@ -67,7 +68,7 @@ bool Camera::OnUpdate(float ts) {
   bool moved = false;
 
   constexpr glm::vec3 upDirection(0.0f, 1.0f, 0.0f);
-  glm::vec3 rightDirection = cross(m_ForwardDirection, upDirection);
+  glm::vec3 rightDirection = cross(w, upDirection);
 
   float speed = 5.0f;
 
@@ -75,11 +76,11 @@ bool Camera::OnUpdate(float ts) {
   if (Input::IsKeyDown(KeyCode::W)) {
 
     printf("W\n");
-    m_origin += m_ForwardDirection * speed * ts;
+    m_origin += w * speed * ts;
     moved = true;
   } else if (Input::IsKeyDown(KeyCode::S)) {
     printf("S\n");
-    m_origin -= m_ForwardDirection * speed * ts;
+    m_origin -= w * speed * ts;
     moved = true;
   }
   if (Input::IsKeyDown(KeyCode::A)) {
@@ -110,7 +111,7 @@ bool Camera::OnUpdate(float ts) {
 
     glm::quat q = normalize(cross(angleAxis(-pitchDelta, rightDirection),
                                   angleAxis(-yawDelta, upDirection)));
-    m_ForwardDirection = rotate(q, m_ForwardDirection);
+    w = rotate(q, w);
 
     moved = true;
   }
@@ -143,7 +144,7 @@ void Camera::RecalculateProjection() {
 }
 
 void Camera::RecalculateView() {
-  m_View = lookAt(m_origin, m_origin + m_ForwardDirection, vec3(0, 1, 0));
+  m_View = lookAt(m_origin, m_origin + w, vec3(0, 1, 0));
   m_InverseView = inverse(m_View);
 }
 
