@@ -34,8 +34,6 @@ Camera::Camera(CameraOrientation orientation, float verticalFov,
   v = cross(w, u);                               // upDirection
 
   m_origin = orientation.lookfrom;
-  // FIXME:
-  w = normalize(orientation.lookat - orientation.lookfrom);
 
   m_horizontal = focusDist * m_viewportWidth * u;
   m_vertical = focusDist * m_viewportHeight * v;
