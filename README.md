@@ -5,21 +5,22 @@
 ## How to use
 
 ```sh
-$bash xrepo add -a -g private-repo https://github.com/linuxing3/xmake-repo.git
+xrepo add -a -g private-repo https://github.com/linuxing3/xmake-repo.git
 ```
 
 ## clone this repo
 
 ```bash
-$bash git clone https://github.com/linuxing3/efwmc-walnut-app.git
-$bash cd efwmc-walnut-app
-$bash xmake // will pull necesary packages from xmake repositories
+git clone https://github.com/linuxing3/efwmc-walnut-app.git test-walnut-app
+cd test-walnut-app
+xmake // will pull necesary packages from xmake repositories
+xmake r
 ```
 
 ## compile commands for header files (for clangd lsp)
 
 ```bash
-$bash xmake project -k compile_commands && mv compile_commands build/
+xmake project -k compile_commands && mv compile_commands build/
 ```
 
 ## Check installed package, `~/.xmake/packages/e/efwmcwalnut/v1.0.0/61df654bcb23488aa9c4fe4d3053ef07/include`

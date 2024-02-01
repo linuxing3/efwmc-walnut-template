@@ -16,7 +16,8 @@ public:
   ~ApplicationLayer() override = default;
 
   void OnUIRender() override;
-  void OnUIRenderT();
+
+  void OnUpdate(float ts) override;
 
   void Run();
 
@@ -27,7 +28,8 @@ private:
 
   // this is our big boy, who'll do all the work
   Render::Renderer m_renderer;
-  Render::Renderer::Scenes m_selectedScene{Render::Renderer::Scenes::DefaultScene};
+  Render::Renderer::Scenes m_selectedScene{
+      Render::Renderer::Scenes::DefaultScene};
 };
 } // namespace RTIAW
 

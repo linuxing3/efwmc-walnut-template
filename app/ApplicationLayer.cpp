@@ -23,7 +23,7 @@ ApplicationLayer::ApplicationLayer()
   m_renderer.SetScene(RTIAW::Render::Renderer::Scenes::OneSphereScene);
 }
 
-void ApplicationLayer::OnUIRenderT() {}
+void ApplicationLayer::OnUpdate(float ts) { m_renderer.OnUpdate(ts); }
 
 void ApplicationLayer::OnUIRender() {
   //   #define R 1
