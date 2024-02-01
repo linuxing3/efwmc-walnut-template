@@ -4,7 +4,6 @@
 #include "Renderer/Materials/Lambertian.h"
 #include "Renderer/Materials/Metal.h"
 #include "Renderer/Renderer.h"
-#include "Renderer/Shapes/Box3.hpp"
 #include "Renderer/Shapes/Rectangle.h"
 #include "Renderer/Shapes/Sphere.h"
 #include "Renderer/Utils.h"
@@ -192,8 +191,6 @@ void Renderer::LoadScene() {
     static int CUBEINDEX[6][3] = {
         {0, 1, 3}, {1, 2, 5}, {2, 3, 6}, {0, 3, 4}, {4, 5, 7}, {4, 0, 5},
     };
-
-    // TODO: mvp matrix
 
     for (int i = 0; i < 6; i++) {
       m_scene.Add(Shapes::Rectangle({
