@@ -30,6 +30,8 @@ public:
     Cube
   };
 
+  glm::mat4x4 mvp{1.0f};
+
   Renderer() : m_logger{spdlog::stdout_color_st("Renderer")} {}
   Renderer(const Renderer &) = delete;
   ~Renderer();

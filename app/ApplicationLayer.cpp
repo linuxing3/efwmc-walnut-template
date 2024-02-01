@@ -13,6 +13,7 @@
 
 #include "ApplicationLayer.h"
 #include "Renderer/Shapes/Rectangle.h"
+#include "imgui.h"
 
 using namespace RTIAW::Render::Shapes;
 namespace RTIAW {
@@ -109,6 +110,12 @@ void ApplicationLayer::OnUIRender() {
       m_renderer.StopRender();
     }
   }
+
+  // TODO: mvp matrix to update vertex coordinates
+  ImGui::DragFloat3("mvp1", value_ptr(m_renderer.mvp[0]), 0.1f, -1.0f, 1.0f);
+  ImGui::DragFloat3("mvp2", value_ptr(m_renderer.mvp[1]), 0.1f, -1.0f, 1.0f);
+  ImGui::DragFloat3("mvp3", value_ptr(m_renderer.mvp[2]), 0.1f, -1.0f, 1.0f);
+  ImGui::DragFloat3("mvp4", value_ptr(m_renderer.mvp[3]), 0.1f, -1.0f, 1.0f);
 
   ImGui::DragFloat3("Camera Position", glm::value_ptr(m_renderer.lookfrom),
                     0.1f, -30.f, 30.0f);

@@ -26,13 +26,13 @@
 
 #pragma once
 #include "Application.h"
-#include "RayTracerLayer.hpp"
 #include "ApplicationLayer.h"
+#include "RayTracerLayer.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace Walnut;
-using namespace RTIAW; 
+using namespace RTIAW;
 
 int main(int argc, char **) {
 
@@ -44,10 +44,12 @@ int main(int argc, char **) {
   auto *app = new Application(spec);
 
   // NOTE:
-  // std::shared_ptr<RayTracerLayer> rayLayer = std::make_shared<RayTracerLayer>();
-  // app->PushLayer(rayLayer);
+  /* std::shared_ptr<RayTracerLayer> rayLayer =
+   * std::make_shared<RayTracerLayer>(); */
+  /* app->PushLayer(rayLayer); */
 
-  std::shared_ptr<ApplicationLayer> applicationLayer = std::make_shared<ApplicationLayer>();
+  std::shared_ptr<ApplicationLayer> applicationLayer =
+      std::make_shared<ApplicationLayer>();
   app->PushLayer(applicationLayer);
   // Sett callbacks
   app->SetMenubarCallback([app]() {

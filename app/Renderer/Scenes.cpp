@@ -1,3 +1,5 @@
+#include <glm/ext/matrix_float4x4.hpp>
+#include <glm/fwd.hpp>
 #include <glm/gtc/random.hpp>
 
 #include "Renderer/Materials/Dielectric.h"
@@ -181,11 +183,13 @@ void Renderer::LoadScene() {
 
                                    -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f,
                                    0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f};
+
     point3 points[8];
     for (int i = 0; i < 8; i++) {
       points[i].x = CUBEVERTICES[i * 3];
       points[i].y = CUBEVERTICES[i * 3 + 1];
       points[i].z = CUBEVERTICES[i * 3 + 2];
+      points[i] = glm::vec3(mvp * glm::vec4(points[i], 1.0f));
     }
 
     static int CUBEINDEX[6][3] = {
