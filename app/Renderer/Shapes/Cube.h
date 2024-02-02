@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Renderer/Materials/Materials.h"
 #include "Renderer/Shapes/Rectangle.h"
 #include <vector>
 #ifndef RTIAW_shapes_cube
@@ -23,10 +24,14 @@ class Cube {
 public:
 public:
   Cube();
-  explicit Cube(std::array<point3, 8> point3);
+  explicit Cube(std::array<point3, 8> points);
 
-  std::array<point3, 8> GetVertices() const { return m_vertices; };
-  std::vector<Shapes::Rectangle> GetRectangles() { return m_rectangles; };
+  [[nodiscard]] std::array<point3, 8> GetVertices() const {
+    return m_vertices;
+  };
+  [[nodiscard]] std::vector<Shapes::Rectangle> GetRectangles() const {
+    return m_rectangles;
+  };
 
   [[nodiscard]] float FastHit(const Ray &r, const float t_min,
                               const float t_max) const;
@@ -40,6 +45,7 @@ private:
   Shapes::Plane m_plane{}; // The origin of this plane lies on one vertex of the
                            // parallelogram
   size_t m_materialIndex{};
+  std::vector<Material> materials;
 };
 } // namespace RTIAW::Render::Shapes
 
