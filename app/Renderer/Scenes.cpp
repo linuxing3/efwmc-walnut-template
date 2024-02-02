@@ -192,7 +192,6 @@ void Renderer::LoadScene() {
     // make the cube rotate according mvp matrix while time collapsed
     lastRenderTime = timer->ElapsedMillis();
 
-    // FIXME: Must resize camera to image size
     m_camera->OnResize(m_imageSize[0], m_imageSize[1]);
 
     point3 points[8];
@@ -201,8 +200,8 @@ void Renderer::LoadScene() {
       points[i].y = CUBEVERTICES[i * 3 + 1];
       points[i].z = CUBEVERTICES[i * 3 + 2];
       // NOTE: update with mvp
-      points[i] = glm::vec3(m_camera->GetProjection() * m_camera->GetView() *
-                            glm::vec4(points[i], 1.0f));
+      points[i] =
+          glm::vec3(m_camera->GetProjection() * glm::vec4(points[i], 1.0f));
     }
 
     static int CUBEINDEX[6][3] = {

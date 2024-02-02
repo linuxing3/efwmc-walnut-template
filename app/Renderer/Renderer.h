@@ -55,7 +55,6 @@ public:
   void StartRender();
   void StopRender();
   void OnUpdate(float ts){
-      // FIXME: can't update cmamera here, it's not thread safe
       // m_camera->OnUpdate(ts);
   };
 

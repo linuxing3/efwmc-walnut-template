@@ -50,7 +50,6 @@ Ray Camera::NewRay(float s, float t) const {
                                     t * m_vertical - m_origin - offset);
 }
 
-// FIXME: this is a hack, should be in ApplicationLayer
 bool Camera::OnUpdate(float ts) {
   vec2 mousePos = Input::GetMousePosition();
   vec2 delta = (mousePos - m_LastMousePosition) * 0.002f;
