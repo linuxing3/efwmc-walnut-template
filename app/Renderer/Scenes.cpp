@@ -10,6 +10,7 @@
 #include "Renderer/Materials/Lambertian.h"
 #include "Renderer/Materials/Metal.h"
 #include "Renderer/Renderer.h"
+#include "Renderer/Shapes/Cube.h"
 #include "Renderer/Shapes/Rectangle.h"
 #include "Renderer/Shapes/Sphere.h"
 #include "Renderer/Utils.h"
@@ -183,38 +184,15 @@ void Renderer::LoadScene() {
                                         aperture, dist_to_focus);
     auto material = Materials::Lambertian(material_color);
 
-    static float CUBEVERTICES[] = {-0.5f, -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,
-                                   0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,
-
-                                   -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f,
-                                   0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f};
-
     // make the cube rotate according mvp matrix while time collapsed
     lastRenderTime = timer->ElapsedMillis();
 
     m_camera->OnResize(m_imageSize[0], m_imageSize[1]);
 
-    point3 points[8];
-    for (int i = 0; i < 8; i++) {
-      points[i].x = CUBEVERTICES[i * 3];
-      points[i].y = CUBEVERTICES[i * 3 + 1];
-      points[i].z = CUBEVERTICES[i * 3 + 2];
-      // NOTE: update with mvp
-      points[i] =
-          glm::vec3(m_camera->GetProjection() * glm::vec4(points[i], 1.0f));
-    }
-
-    static int CUBEINDEX[6][3] = {
-        {0, 1, 3}, {1, 2, 5}, {2, 3, 6}, {0, 3, 4}, {4, 5, 7}, {4, 0, 5},
-    };
-
-    for (int i = 0; i < 6; i++) {
-      m_scene.Add(Shapes::Rectangle({
-                      scale * points[CUBEINDEX[i][0]],
-                      scale * points[CUBEINDEX[i][1]],
-                      scale * points[CUBEINDEX[i][2]],
-                  }),
-                  material);
+    Shapes::Cube cube{};
+    auto rectangles = cube.GetRectangles();
+    for (auto &rect : rectangles) {
+      m_scene.Add(rect, material);
     }
 
     auto plane_material = Materials::Lambertian(color(0.6, 0.6, 0.6));

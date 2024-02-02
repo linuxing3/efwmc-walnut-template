@@ -2,6 +2,12 @@
 
 #include <stdexcept>
 
+#include <array>
+#include <optional>
+
+#include "Renderer/HitRecord.h"
+#include "Renderer/Utils.h"
+
 namespace RTIAW::Render::Shapes {
 Plane::Plane(const point3 &point, const float polar, const float azimuth)
     : m_point(point), m_polar(polar), m_azimuth(azimuth) {
@@ -50,7 +56,7 @@ t intersection value along the ray.
 @param r The ray to test for intersection
 @param t_min The minimum t value range for a valid intersection
 @param t_max The maximum t value range for a valid intersection
-@return The t value of the intersection, or infinity if no intersection 
+@return The t value of the intersection, or infinity if no intersection
 */
 float Plane::FastHit(const Ray &r, const float t_min, const float t_max) const {
   const float d_dot_n = glm::dot(r.direction, m_normal);
