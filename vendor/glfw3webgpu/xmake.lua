@@ -1,0 +1,11 @@
+add_requires('glfw-walnut')
+
+target('glfw3webgpu')
+set_kind('static')
+add_files('*.c')
+set_targetdir('.')
+add_includedirs('.')
+add_includedirs('../webgpu/include/webgpu')
+add_packages('glfw-walnut')
+add_linkdirs('../webgpu/bin/linux-x86_64')
+add_links('wgpu')
