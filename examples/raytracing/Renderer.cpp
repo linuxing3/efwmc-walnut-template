@@ -151,7 +151,7 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) {
                                      texture[4 * (textureIdx) + 2] / 255.0f);
 
   glm::vec3 light(0.0f);
-  light += textureColor;
+  /* light += textureColor; // earth map as background */
 
   int bounces = 5;
   for (int i = 0; i < bounces; i++) {
@@ -163,7 +163,8 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) {
     const Sphere &sphere = m_ActiveScene->Spheres[payload.ObjectIndex];
     const Material &material = m_ActiveScene->Materials[sphere.MaterialIndex];
 
-    light += material.GetEmission();
+    light +=
+        textureColor + material.GetEmission(); // earth map as mipmap of sphere
 
     ray.Origin = payload.WorldPosition + payload.WorldNormal * 0.0001f;
     // ray.Direction = glm::reflect(ray.Direction,
