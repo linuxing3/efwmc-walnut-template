@@ -34,6 +34,16 @@ private:
     glm::vec3 WorldNormal;
 
     int ObjectIndex;
+
+    std::tuple<float, float> GetUV() {
+      glm::vec3 n = glm::normalize(WorldPosition);
+      float x = n.x;
+      float y = n.y;
+      float z = n.z;
+      float u = std::atan2(x, z) / (2.0 * 3.1415926) + 0.5;
+      float v = y * 0.5 + 0.5;
+      return std::tuple<float, float>(u, v);
+    }
   };
 
   glm::vec4 PerPixel(uint32_t x, uint32_t y); // RayGen

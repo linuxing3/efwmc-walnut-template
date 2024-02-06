@@ -140,11 +140,15 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) {
 
   auto [texture, textureWidth, textureHeight] = m_TextureData;
   // texture sample
+/* #define USE_UV */
+#ifdef USE_UV
+#else
   uint32_t textureIdx = x * (textureWidth / m_ViewportWidth) +
                         y * textureWidth * (textureHeight / m_ViewportHeight);
   glm::vec3 textureColor = glm::vec3(texture[4 * (textureIdx) + 0] / 255.0f,
                                      texture[4 * (textureIdx) + 1] / 255.0f,
                                      texture[4 * (textureIdx) + 2] / 255.0f);
+#endif
 
   glm::vec3 light(0.0f);
   /* light += textureColor; // earth map as background */
@@ -155,6 +159,15 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) {
     if (payload.HitDistance < 0.0f) {
       break;
     }
+
+#ifdef USE_UV
+    auto [u, v] = payload.GetUV();
+    uint32_t textureIdx =
+        u * (textureWidth) + v * textureWidth * (textureHeight);
+    glm::vec3 textureColor = glm::vec3(texture[4 * (textureIdx) + 0] / 255.0f,
+                                       texture[4 * (textureIdx) + 1] / 255.0f,
+                                       texture[4 * (textureIdx) + 2] / 255.0f);
+#endif
 
     const Sphere &sphere = m_ActiveScene->Spheres[payload.ObjectIndex];
     const Material &material = m_ActiveScene->Materials[sphere.MaterialIndex];
