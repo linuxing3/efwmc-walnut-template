@@ -2,6 +2,13 @@
 
 #include "Walnut/Random.h"
 
+/* #ifndef STB_IMAGE_IMPLEMENTATION */
+/* #define STB_IMAGE_IMPLEMENTATION */
+/* #endif // !STB_IMAGE_IMPLEMENTATION */
+#include "stb/stb_image.h"
+#include <cstdint>
+#include <glm/fwd.hpp>
+#include <tuple>
 /* #include <execution> */
 
 namespace Utils {
@@ -18,17 +25,28 @@ static uint32_t ConvertToRGBA(const glm::vec4 &color) {
 
 } // namespace Utils
 
+static std::tuple<uint8_t *, int, int> LoadImage(std::string path) {
+
+  int width, height, channels;
+  uint8_t *data = nullptr;
+  data = stbi_load(path.c_str(), &width, &height, &channels, 4);
+  std::tuple<uint8_t *, int, int> result(data, width, height);
+  return result;
+}
+
 void Renderer::OnResize(uint32_t width, uint32_t height) {
   if (m_FinalImage) {
     // No resize necessary
-    if (m_FinalImage->GetWidth() == width &&
-        m_FinalImage->GetHeight() == height)
+    if (m_ViewportWidth == width && m_ViewportHeight == height)
       return;
 
     m_FinalImage->Resize(width, height);
   } else {
     m_FinalImage = std::make_shared<Walnut::Image>(width, height,
                                                    Walnut::ImageFormat::RGBA);
+
+    m_ViewportWidth = width;
+    m_ViewportHeight = height;
   }
 
   delete[] m_ImageData;
@@ -45,14 +63,25 @@ void Renderer::OnResize(uint32_t width, uint32_t height) {
     m_ImageVerticalIter[i] = i;
 }
 
+Renderer::~Renderer() {
+  // TODO: texture sample
+}
+
+Renderer::Renderer() {
+  // TODO: texture sample
+  m_TextureData = LoadImage("./wgpu/earthmap.jpeg");
+}
+
 void Renderer::Render(const Scene &scene, const Camera &camera) {
   m_ActiveScene = &scene;
   m_ActiveCamera = &camera;
 
+  m_ViewportWidth = m_FinalImage->GetWidth();
+  m_ViewportHeight = m_FinalImage->GetHeight();
+
   if (m_FrameIndex == 1)
     memset(m_AccumulationData, 0,
-           m_FinalImage->GetWidth() * m_FinalImage->GetHeight() *
-               sizeof(glm::vec4));
+           m_ViewportWidth * m_ViewportHeight * sizeof(glm::vec4));
 
 /* #define MT 1 */
 #if MT
@@ -78,19 +107,23 @@ void Renderer::Render(const Scene &scene, const Camera &camera) {
 
 #else
 
-  for (uint32_t y = 0; y < m_FinalImage->GetHeight(); y++) {
-    for (uint32_t x = 0; x < m_FinalImage->GetWidth(); x++) {
-      glm::vec4 color = PerPixel(x, y);
-      m_AccumulationData[x + y * m_FinalImage->GetWidth()] += color;
+  for (uint32_t y = 0; y < m_ViewportHeight; y++) {
+    for (uint32_t x = 0; x < m_ViewportWidth; x++) {
 
-      glm::vec4 accumulatedColor =
-          m_AccumulationData[x + y * m_FinalImage->GetWidth()];
+      // PerPixel color from ray tracing
+
+      glm::vec4 color = PerPixel(x, y);
+
+      uint32_t imageIndex = x + y * m_ViewportWidth;
+      m_AccumulationData[imageIndex] += color;
+
+      glm::vec4 accumulatedColor = m_AccumulationData[imageIndex];
       accumulatedColor /= (float)m_FrameIndex;
 
       accumulatedColor =
           glm::clamp(accumulatedColor, glm::vec4(0.0f), glm::vec4(1.0f));
-      m_ImageData[x + y * m_FinalImage->GetWidth()] =
-          Utils::ConvertToRGBA(accumulatedColor);
+
+      m_ImageData[imageIndex] = Utils::ConvertToRGBA(color);
     }
   }
 #endif
@@ -109,22 +142,27 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) {
   ray.Direction =
       m_ActiveCamera->GetRayDirections()[x + y * m_FinalImage->GetWidth()];
 
+  auto [texture, textureWidth, textureHeight] = m_TextureData;
+  // texture sample
+  uint32_t textureIdx = x * (textureWidth / m_ViewportWidth) +
+                        y * textureWidth * (textureHeight / m_ViewportHeight);
+  glm::vec3 textureColor = glm::vec3(texture[4 * (textureIdx) + 0] / 255.0f,
+                                     texture[4 * (textureIdx) + 1] / 255.0f,
+                                     texture[4 * (textureIdx) + 2] / 255.0f);
+
   glm::vec3 light(0.0f);
-  glm::vec3 contribution(1.0f);
+  light += textureColor;
 
   int bounces = 5;
   for (int i = 0; i < bounces; i++) {
     Renderer::HitPayload payload = TraceRay(ray);
     if (payload.HitDistance < 0.0f) {
-      glm::vec3 skyColor = glm::vec3(0.6f, 0.7f, 0.9f);
-      // light += skyColor * contribution;
       break;
     }
 
     const Sphere &sphere = m_ActiveScene->Spheres[payload.ObjectIndex];
     const Material &material = m_ActiveScene->Materials[sphere.MaterialIndex];
 
-    contribution *= material.Albedo;
     light += material.GetEmission();
 
     ray.Origin = payload.WorldPosition + payload.WorldNormal * 0.0001f;

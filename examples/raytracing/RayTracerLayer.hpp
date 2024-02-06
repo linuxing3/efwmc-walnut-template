@@ -5,11 +5,22 @@
 #include "Camera.h"
 #include "Renderer.h"
 
+#include "stb/stb_image.h"
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace Walnut;
 
+static std::tuple<uint8_t *, int, int> LoadImage(std::string path) {
+
+  int width, height, channels;
+  uint8_t *data = nullptr;
+  data = stbi_load(path.c_str(), &width, &height, &channels, 4);
+  std::tuple<uint8_t *, int, int> result(data, width, height);
+  return result;
+}
+
 class RayTracerLayer : public Walnut::Layer {
+
 public:
   RayTracerLayer() : m_Camera(45.0f, 0.1f, 100.0f) {
 
