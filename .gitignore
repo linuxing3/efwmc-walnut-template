@@ -1,3 +1,5 @@
 build
 .xmake/linux/x86_64
 compile_commands.json
+examples/raytracing/raytracing_example_app
+examples/raytracing2/raytracing2_example_app
