@@ -2,14 +2,11 @@
 
 #include "Walnut/Random.h"
 
-/* #ifndef STB_IMAGE_IMPLEMENTATION */
-/* #define STB_IMAGE_IMPLEMENTATION */
-/* #endif // !STB_IMAGE_IMPLEMENTATION */
 #include "stb/stb_image.h"
 #include <cstdint>
+#include <execution>
 #include <glm/fwd.hpp>
 #include <tuple>
-/* #include <execution> */
 
 namespace Utils {
 
@@ -83,7 +80,7 @@ void Renderer::Render(const Scene &scene, const Camera &camera) {
     memset(m_AccumulationData, 0,
            m_ViewportWidth * m_ViewportHeight * sizeof(glm::vec4));
 
-/* #define MT 1 */
+#define MT 1
 #if MT
   std::for_each(
       std::execution::par, m_ImageVerticalIter.begin(),
@@ -91,17 +88,16 @@ void Renderer::Render(const Scene &scene, const Camera &camera) {
         std::for_each(
             std::execution::par, m_ImageHorizontalIter.begin(),
             m_ImageHorizontalIter.end(), [this, y](uint32_t x) {
+              uint32_t imageIndex = x + y * m_ViewportWidth;
               glm::vec4 color = PerPixel(x, y);
-              m_AccumulationData[x + y * m_FinalImage->GetWidth()] += color;
+              m_AccumulationData[imageIndex] += color;
 
-              glm::vec4 accumulatedColor =
-                  m_AccumulationData[x + y * m_FinalImage->GetWidth()];
+              glm::vec4 accumulatedColor = m_AccumulationData[imageIndex];
               accumulatedColor /= (float)m_FrameIndex;
-
               accumulatedColor = glm::clamp(accumulatedColor, glm::vec4(0.0f),
                                             glm::vec4(1.0f));
-              m_ImageData[x + y * m_FinalImage->GetWidth()] =
-                  Utils::ConvertToRGBA(accumulatedColor);
+
+              m_ImageData[imageIndex] = Utils::ConvertToRGBA(accumulatedColor);
             });
       });
 

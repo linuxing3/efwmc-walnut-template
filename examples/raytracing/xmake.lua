@@ -1,6 +1,36 @@
 --- @diagnostic disable:undefined-global
 
-add_rules('mode.debug', 'mode.release')
+add_rules('mode.debug', 'mode.releasedbg', 'mode.release')
+
+if is_mode('debug') then
+    set_optimize('none')
+    set_runtimes('MDd')
+elseif is_mode('releasedbg') then
+    set_optimize('fastest')
+    set_runtimes('MD')
+    set_policy('build.optimization.lto', true)
+elseif is_mode('release') then
+    set_strip('all')
+    set_symbols('hidden')
+    set_optimize('fastest')
+    set_runtimes('MT')
+    add_defines('NDEBUG')
+    set_policy('build.optimization.lto', true)
+end
+
+if is_mode('debug', 'releasedbg') then
+    set_symbols('debug')
+    set_policy('build.warning', true)
+    -- use dynamic libraries acceleration on linking
+    add_requireconfs('*', { configs = { shared = true } })
+end
+-- support utf-8 on msvc
+if is_host('windows') then
+    add_defines('UNICODE', '_UNICODE')
+    add_cxflags('/utf-8', { tools = 'cl' })
+end
+-- disable sqrt function negative check
+add_cxxflags('-fno-math-errno', { tools = { 'gcc', 'clang' } })
 
 add_requires('efwmcwalnut')
 add_requires('imgui-walnut walnut', { configs = { glfw = true, vulkan = true } })
@@ -24,7 +54,7 @@ add_packages('glfw-walnut', 'imgui-walnut')
 add_includedirs('$(projectdir)/vendor/webgpu/include')
 add_includedirs('$(projectdir)/vendor/webgpu/include/webgpu')
 add_linkdirs('$(projectdir)/vendor/webgpu/bin/linux-x86_64')
-add_links('wgpu')
+add_links('wgpu', 'pthread', 'tbb')
 add_deps('glfw3webgpu')
 add_links('glfw3webgpu')
 after_build(function(target)
