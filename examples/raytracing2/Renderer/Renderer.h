@@ -31,6 +31,8 @@ public:
     Cube
   };
 
+  std::tuple<uint8_t *, int, int> m_TextureData;
+
   Walnut::Timer *timer;
   // define a mvp struct holds all the mvp matrices
   struct MVP {

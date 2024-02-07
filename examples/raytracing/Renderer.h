@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ResourceManager.h"
 #include "Walnut/Image.h"
 
 #include "Camera.h"
@@ -8,6 +9,8 @@
 
 #include <glm/glm.hpp>
 #include <memory>
+
+using VertexAttributes = ResourceManager::VertexAttributes;
 
 class Renderer {
 public:
@@ -56,8 +59,11 @@ private:
   std::shared_ptr<Walnut::Image> m_FinalImage;
   Settings m_Settings;
 
+  // texture stuff
   std::tuple<uint8_t *, int, int> m_TextureData;
+  std::vector<VertexAttributes> m_VertexData;
 
+  // Walnut stuff
   std::vector<uint32_t> m_ImageHorizontalIter, m_ImageVerticalIter;
 
   const Scene *m_ActiveScene = nullptr;

@@ -11,7 +11,10 @@
 // #include "Materials/Material.h"
 #include "Renderer/HittableObjectList.h"
 
+#include "stb/stb_image.h"
 #include <numeric>
+
+const std::string EARTHMAP_PATH = RESOURCE_DIR "/earthmap.jpeg";
 
 #define RENDER_PERQUAD
 
@@ -33,6 +36,15 @@ static color ConvertColor(color pixel_color) {
   auto g = static_cast<uint8_t>(255.0f * pixel_color.g);
   auto b = static_cast<uint8_t>(255.0f * pixel_color.b);
   color result{r, g, b};
+  return result;
+}
+
+static std::tuple<uint8_t *, int, int> LoadImage(std::string path) {
+
+  int width, height, channels;
+  uint8_t *data = nullptr;
+  data = stbi_load(path.c_str(), &width, &height, &channels, 4);
+  std::tuple<uint8_t *, int, int> result(data, width, height);
   return result;
 }
 
@@ -63,6 +75,8 @@ void Renderer::StartRender() {
     break;
   }
 
+  m_TextureData = LoadImage(EARTHMAP_PATH);
+
   LoadScene();
   m_renderingThread = std::thread{&Renderer::Render, this};
 }
@@ -91,15 +105,56 @@ void Renderer::Render() {
   timer = new Walnut::Timer();
   m_state = RenderState::Running;
 
+  auto renderPixel = [this]() {
+    if (m_state == RenderState::Stopped) {
+      return;
+    }
+
+    auto [texture, textureWidth, textureHeight] = m_TextureData;
+
+    for (int j = m_imageSize.y - 1; j >= 0; --j) {
+      for (unsigned int i = 0; i < m_imageSize.x; ++i) {
+        const auto pixelCoord = glm::uvec2{i, j};
+        color pixel_color{0, 0, 0};
+
+        for (unsigned int i_sample = 0; i_sample < samplesPerPixel;
+             ++i_sample) {
+          const auto u = (static_cast<float>(pixelCoord.x) +
+                          m_unifDistribution(m_rnGenerator)) /
+                         (m_imageSize.x - 1);
+          const auto v = (static_cast<float>(pixelCoord.y) +
+                          m_unifDistribution(m_rnGenerator)) /
+                         (m_imageSize.y - 1);
+
+          // TODO: texture mapping
+          uint32_t textureIdx =
+              u * (textureWidth) + v * textureWidth * (textureHeight);
+          glm::vec3 textureColor =
+              glm::vec3(texture[4 * (textureIdx) + 0] / 255.0f,
+                        texture[4 * (textureIdx) + 1] / 255.0f,
+                        texture[4 * (textureIdx) + 2] / 255.0f);
+
+          Ray r = m_camera->NewRay(u, v);
+          pixel_color += ShootRay(r, maxRayDepth);
+          /* pixel_color += textureColor; */
+        }
+        WritePixelToBuffer(pixelCoord.x, pixelCoord.y, samplesPerPixel,
+                           pixel_color);
+      }
+    }
+  };
+#define RENDER_PERLINE
 #ifdef RENDER_PERLINE
   auto renderLine = [this](const unsigned int lineCoord) {
     if (m_state == RenderState::Stopped) {
       return;
     }
 
+    auto [texture, textureWidth, textureHeight] = m_TextureData;
     for (unsigned int i = 0; i < m_imageSize.x; ++i) {
       const auto pixelCoord = glm::uvec2{i, lineCoord};
       color pixel_color{0, 0, 0};
+
       for (unsigned int i_sample = 0; i_sample < samplesPerPixel; ++i_sample) {
         const auto u = (static_cast<float>(pixelCoord.x) +
                         m_unifDistribution(m_rnGenerator)) /
@@ -107,8 +162,18 @@ void Renderer::Render() {
         const auto v = (static_cast<float>(pixelCoord.y) +
                         m_unifDistribution(m_rnGenerator)) /
                        (m_imageSize.y - 1);
+
+        // TODO: texture mapping
+        uint32_t textureIdx =
+            u * (textureWidth) + v * textureWidth * (textureHeight);
+        glm::vec3 textureColor =
+            glm::vec3(texture[4 * (textureIdx) + 0] / 255.0f,
+                      texture[4 * (textureIdx) + 1] / 255.0f,
+                      texture[4 * (textureIdx) + 2] / 255.0f);
+
         Ray r = m_camera->NewRay(u, v);
         pixel_color += ShootRay(r, maxRayDepth);
+        pixel_color += textureColor;
       }
       WritePixelToBuffer(pixelCoord.x, pixelCoord.y, samplesPerPixel,
                          pixel_color);
@@ -151,6 +216,9 @@ void Renderer::Render() {
   for (int j = m_imageSize.y - 1; j >= 0; --j) {
     futures.push_back(m_threadPool.AddTask(renderLine, j));
   }
+  /* for (int j = m_imageSize.y - 1; j >= 0; --j) { */
+  /*   futures.push_back(m_threadPool.AddTask(renderPixel)); */
+  /* } */
 #else
   // Render per-quad
   for (const auto &[minCoo, maxCoo] : SplitImage()) {

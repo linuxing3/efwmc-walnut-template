@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Renderer.h"
 
 #include "Walnut/Random.h"
@@ -5,8 +7,15 @@
 #include "stb/stb_image.h"
 #include <cstdint>
 #include <execution>
-#include <glm/fwd.hpp>
+#include <glm/gtx/dual_quaternion.hpp>
 #include <tuple>
+
+#include <glm/fwd.hpp>
+#include <glm/gtx/hash.hpp>
+
+const std::string MODEL_PATH = RESOURCE_DIR "/fourareen.obj";
+const std::string TEXTURE_PATH = RESOURCE_DIR "/fourareen2k_albedo.png";
+const std::string EARTHMAP_PATH = RESOURCE_DIR "/earthmap.jpeg";
 
 namespace Utils {
 
@@ -66,7 +75,24 @@ Renderer::~Renderer() {
 
 Renderer::Renderer() {
   // TODO: texture sample
-  m_TextureData = LoadImage("./wgpu/earthmap.jpeg");
+  m_TextureData = LoadImage(EARTHMAP_PATH);
+
+  // Load model
+  bool success = ResourceManager::loadGeometryFromObj(MODEL_PATH, m_VertexData);
+  if (!success) {
+    std::cerr << "Failed to load model" << std::endl;
+  }
+#ifdef DEBUG
+  for (int i = 0; i < m_VertexData.size(); i++) {
+    glm::vec3 textureColor = glm::vec3(m_VertexData[i].color[0] / 255.0f,
+                                       m_VertexData[i].color[1] / 255.0f,
+                                       m_VertexData[i].color[2] / 255.0f);
+    glm::vec3 position = glm::normalize(m_VertexData[i].position) * 0.5f + 0.5f;
+    printf("position: %f, %f, %f\n", position.x, position.y, position.z);
+    printf("color: %f, %f, %f\n", textureColor.x, textureColor.y,
+           textureColor.z);
+  }
+#endif
 }
 
 void Renderer::Render(const Scene &scene, const Camera &camera) {
@@ -81,7 +107,7 @@ void Renderer::Render(const Scene &scene, const Camera &camera) {
            m_ViewportWidth * m_ViewportHeight * sizeof(glm::vec4));
 
 #define MT 1
-#if MT
+#ifdef MT
   std::for_each(
       std::execution::par, m_ImageVerticalIter.begin(),
       m_ImageVerticalIter.end(), [this](uint32_t y) {
@@ -101,6 +127,20 @@ void Renderer::Render(const Scene &scene, const Camera &camera) {
             });
       });
 
+#ifdef USE_MODEL
+  // map m_VertexData
+  for (int i = 0; i < m_VertexData.size(); i++) {
+    glm::vec3 textureColor = glm::vec3(m_VertexData[i].color[0] / 255.0f,
+                                       m_VertexData[i].color[2] / 255.0f,
+                                       m_VertexData[i].color[1] / 255.0f);
+    glm::vec3 position = glm::normalize(m_VertexData[i].position) * 0.5f + 0.5f;
+    int x = position.x * m_ViewportWidth;
+    int y = position.y * m_ViewportHeight;
+    int imageIndex = x + y * m_ViewportWidth;
+    m_ImageData[imageIndex] =
+        Utils::ConvertToRGBA(glm::vec4(1.0f, 0.0, 1.0, 1.0f));
+  }
+#endif
 #else
 
   for (uint32_t y = 0; y < m_ViewportHeight; y++) {
@@ -138,6 +178,7 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) {
   ray.Direction =
       m_ActiveCamera->GetRayDirections()[x + y * m_FinalImage->GetWidth()];
 
+  // map texture
   auto [texture, textureWidth, textureHeight] = m_TextureData;
   // texture sample
 /* #define USE_UV */
@@ -175,7 +216,7 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) {
     light +=
         textureColor + material.GetEmission(); // earth map as mipmap of sphere
 
-    ray.Origin = payload.WorldPosition + payload.WorldNormal * 0.0001f;
+    ray.Origin = payload.WorldPosition + payload.WorldNormal * 1e-4f;
     // ray.Direction = glm::reflect(ray.Direction,
     //	payload.WorldNormal + material.Roughness * Walnut::Random::Vec3(-0.5f,
     // 0.5f));

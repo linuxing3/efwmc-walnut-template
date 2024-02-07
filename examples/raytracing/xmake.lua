@@ -36,6 +36,7 @@ add_requires('efwmcwalnut')
 add_requires('imgui-walnut walnut', { configs = { glfw = true, vulkan = true } })
 add_requires('glfw-walnut walnut', { configs = { glfw_include = 'vulkan' } })
 add_requires('spdlog', 'fmt', 'magic_enum')
+add_requires('stb', 'tinyobjloader')
 
 -- main app
 target('raytracing_example_app')
@@ -48,6 +49,7 @@ add_defines('WEBGPU_BACKEND_WGPU')
 set_targetdir('.')
 -- packges with link need
 add_packages('spdlog', 'fmt', 'magic_enum')
+add_packages('stb', 'tinyobjloader')
 add_packages('efwmcwalnut')
 add_packages('glfw-walnut', 'imgui-walnut')
 -- local packges with include and link need
