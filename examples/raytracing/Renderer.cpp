@@ -31,15 +31,6 @@ static uint32_t ConvertToRGBA(const glm::vec4 &color) {
 
 } // namespace Utils
 
-static std::tuple<uint8_t *, int, int> LoadImage(std::string path) {
-
-  int width, height, channels;
-  uint8_t *data = nullptr;
-  data = stbi_load(path.c_str(), &width, &height, &channels, 4);
-  std::tuple<uint8_t *, int, int> result(data, width, height);
-  return result;
-}
-
 void Renderer::OnResize(uint32_t width, uint32_t height) {
   if (m_FinalImage) {
     // No resize necessary
@@ -74,8 +65,6 @@ Renderer::~Renderer() {
 }
 
 Renderer::Renderer() {
-  // TODO: texture sample
-  m_TextureData = LoadImage(EARTHMAP_PATH);
 
   // Load model
   bool success = ResourceManager::loadGeometryFromObj(MODEL_PATH, m_VertexData);
@@ -178,12 +167,10 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) {
   ray.Direction =
       m_ActiveCamera->GetRayDirections()[x + y * m_FinalImage->GetWidth()];
 
-  // map texture
-  auto [texture, textureWidth, textureHeight] = m_TextureData;
-  // texture sample
-/* #define USE_UV */
+#define USE_UV
 #ifdef USE_UV
 #else
+  auto [texture, textureWidth, textureHeight] = m_TextureData;
   uint32_t textureIdx = x * (textureWidth / m_ViewportWidth) +
                         y * textureWidth * (textureHeight / m_ViewportHeight);
   glm::vec3 textureColor = glm::vec3(texture[4 * (textureIdx) + 0] / 255.0f,
@@ -192,7 +179,6 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) {
 #endif
 
   glm::vec3 light(0.0f);
-  /* light += textureColor; // earth map as background */
 
   int bounces = 5;
   for (int i = 0; i < bounces; i++) {
@@ -201,20 +187,10 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) {
       break;
     }
 
-#ifdef USE_UV
-    auto [u, v] = payload.GetUV();
-    uint32_t textureIdx =
-        u * (textureWidth) + v * textureWidth * (textureHeight);
-    glm::vec3 textureColor = glm::vec3(texture[4 * (textureIdx) + 0] / 255.0f,
-                                       texture[4 * (textureIdx) + 1] / 255.0f,
-                                       texture[4 * (textureIdx) + 2] / 255.0f);
-#endif
-
     const Sphere &sphere = m_ActiveScene->Spheres[payload.ObjectIndex];
     const Material &material = m_ActiveScene->Materials[sphere.MaterialIndex];
 
-    light +=
-        textureColor + material.GetEmission(); // earth map as mipmap of sphere
+    light += material.GetEmission(); // earth map as mipmap of sphere
 
     ray.Origin = payload.WorldPosition + payload.WorldNormal * 1e-4f;
     // ray.Direction = glm::reflect(ray.Direction,
@@ -239,7 +215,7 @@ Renderer::HitPayload Renderer::TraceRay(const Ray &ray) {
   float hitDistance = std::numeric_limits<float>::max();
   for (size_t i = 0; i < m_ActiveScene->Spheres.size(); i++) {
     const Sphere &sphere = m_ActiveScene->Spheres[i];
-    glm::vec3 origin = ray.Origin - sphere.Position;
+    glm::vec3 origin = ray.Origin - sphere.Center;
 
     float a = glm::dot(ray.Direction, ray.Direction);
     float b = 2.0f * glm::dot(origin, ray.Direction);
@@ -278,11 +254,19 @@ Renderer::HitPayload Renderer::ClosestHit(const Ray &ray, float hitDistance,
 
   const Sphere &closestSphere = m_ActiveScene->Spheres[objectIndex];
 
-  glm::vec3 origin = ray.Origin - closestSphere.Position;
+  glm::vec3 origin = ray.Origin - closestSphere.Center;
   payload.WorldPosition = origin + ray.Direction * hitDistance;
-  payload.WorldNormal = glm::normalize(payload.WorldPosition);
+  // FIXME: this is not normal
+  /* payload.WorldNormal = glm::normalize(payload.WorldPosition); */
+  payload.WorldNormal =
+      (payload.WorldPosition - closestSphere.Center) / closestSphere.Radius;
 
-  payload.WorldPosition += closestSphere.Position;
+  auto [_u, _v] = payload.GetUV(payload.WorldPosition - closestSphere.Center);
+
+  payload.u = _u;
+  payload.v = _v;
+
+  payload.WorldPosition += closestSphere.Center;
 
   return payload;
 }

@@ -10,29 +10,24 @@
 
 using namespace Walnut;
 
-static std::tuple<uint8_t *, int, int> LoadImage(std::string path) {
-
-  int width, height, channels;
-  uint8_t *data = nullptr;
-  data = stbi_load(path.c_str(), &width, &height, &channels, 4);
-  std::tuple<uint8_t *, int, int> result(data, width, height);
-  return result;
-}
+const std::string EARTHMAP_PATH = RESOURCE_DIR "/earthmap.jpeg";
 
 class RayTracerLayer : public Walnut::Layer {
 
 public:
   RayTracerLayer() : m_Camera(45.0f, 0.1f, 100.0f) {
 
-    Material &pinkSphere = m_Scene.Materials.emplace_back();
+    EFWMC::Texture *image = new EFWMC::Texture(EARTHMAP_PATH);
+
+    Material &pinkSphere = m_Scene.Materials.emplace_back(image);
     pinkSphere.Albedo = {1.0f, 0.0f, 1.0f};
     pinkSphere.Roughness = 0.0f;
 
-    Material &blueSphere = m_Scene.Materials.emplace_back();
+    Material &blueSphere = m_Scene.Materials.emplace_back(image);
     blueSphere.Albedo = {0.2f, 0.3f, 1.0f};
     blueSphere.Roughness = 0.1f;
 
-    Material &orangeSphere = m_Scene.Materials.emplace_back();
+    Material &orangeSphere = m_Scene.Materials.emplace_back(image);
     orangeSphere.Albedo = {0.8f, 0.5f, 0.2f};
     orangeSphere.Roughness = 0.1f;
     orangeSphere.EmissionColor = orangeSphere.Albedo;
@@ -40,7 +35,7 @@ public:
 
     {
       Sphere sphere;
-      sphere.Position = {0.0f, 0.0f, 0.0f};
+      sphere.Center = {0.0f, 0.0f, 0.0f};
       sphere.Radius = 1.0f;
       sphere.MaterialIndex = 0;
       m_Scene.Spheres.push_back(sphere);
@@ -48,7 +43,7 @@ public:
 
     {
       Sphere sphere;
-      sphere.Position = {2.0f, 0.0f, 0.0f};
+      sphere.Center = {2.0f, 0.0f, 0.0f};
       sphere.Radius = 1.0f;
       sphere.MaterialIndex = 2;
       m_Scene.Spheres.push_back(sphere);
@@ -56,7 +51,7 @@ public:
 
     {
       Sphere sphere;
-      sphere.Position = {0.0f, -101.0f, 0.0f};
+      sphere.Center = {0.0f, -101.0f, 0.0f};
       sphere.Radius = 100.0f;
       sphere.MaterialIndex = 1;
       m_Scene.Spheres.push_back(sphere);
@@ -87,7 +82,7 @@ public:
       ImGui::PushID(i);
 
       Sphere &sphere = m_Scene.Spheres[i];
-      ImGui::DragFloat3("Position", glm::value_ptr(sphere.Position), 0.1f);
+      ImGui::DragFloat3("Position", glm::value_ptr(sphere.Center), 0.1f);
       ImGui::DragFloat("Radius", &sphere.Radius, 0.1f);
       ImGui::DragInt("Material", &sphere.MaterialIndex, 1.0f, 0,
                      (int)m_Scene.Materials.size() - 1);

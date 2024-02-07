@@ -7,6 +7,7 @@
 #include "Ray.h"
 #include "Scene.h"
 
+#include <cstdint>
 #include <glm/glm.hpp>
 #include <memory>
 
@@ -35,11 +36,13 @@ private:
     float HitDistance;
     glm::vec3 WorldPosition;
     glm::vec3 WorldNormal;
+    uint32_t u;
+    uint32_t v;
 
     int ObjectIndex;
 
-    std::tuple<float, float> GetUV() {
-      glm::vec3 n = glm::normalize(WorldPosition);
+    std::tuple<float, float> GetUV(glm::vec3 hitPosition) {
+      glm::vec3 n = glm::normalize(hitPosition);
       float x = n.x;
       float y = n.y;
       float z = n.z;
