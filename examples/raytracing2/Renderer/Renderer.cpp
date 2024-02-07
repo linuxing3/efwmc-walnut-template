@@ -128,7 +128,8 @@ void Renderer::Render() {
 
           // TODO: texture mapping
           uint32_t textureIdx =
-              u * (textureWidth) + v * textureWidth * (textureHeight);
+              pixelCoord.x * (textureWidth / m_imageSize.x) +
+              pixelCoord.y * textureWidth * (textureHeight / m_imageSize.y);
           glm::vec3 textureColor =
               glm::vec3(texture[4 * (textureIdx) + 0] / 255.0f,
                         texture[4 * (textureIdx) + 1] / 255.0f,
@@ -136,14 +137,14 @@ void Renderer::Render() {
 
           Ray r = m_camera->NewRay(u, v);
           pixel_color += ShootRay(r, maxRayDepth);
-          /* pixel_color += textureColor; */
+          pixel_color += textureColor;
         }
         WritePixelToBuffer(pixelCoord.x, pixelCoord.y, samplesPerPixel,
                            pixel_color);
       }
     }
   };
-#define RENDER_PERLINE
+/* #define RENDER_PERLINE */
 #ifdef RENDER_PERLINE
   auto renderLine = [this](const unsigned int lineCoord) {
     if (m_state == RenderState::Stopped) {
@@ -165,7 +166,8 @@ void Renderer::Render() {
 
         // TODO: texture mapping
         uint32_t textureIdx =
-            u * (textureWidth) + v * textureWidth * (textureHeight);
+            pixelCoord.x * (textureWidth / m_imageSize.x) +
+            pixelCoord.y * textureWidth * (textureHeight / m_imageSize.y);
         glm::vec3 textureColor =
             glm::vec3(texture[4 * (textureIdx) + 0] / 255.0f,
                       texture[4 * (textureIdx) + 1] / 255.0f,
@@ -188,6 +190,7 @@ void Renderer::Render() {
 
     std::mt19937 generator{std::random_device{}()};
 
+    auto [texture, textureWidth, textureHeight] = m_TextureData;
     for (unsigned int j = maxCoo.y; j > minCoo.y; --j) {
       for (unsigned int i = minCoo.x; i < maxCoo.x; ++i) {
         color pixel_color{0, 0, 0};
@@ -200,8 +203,17 @@ void Renderer::Render() {
           const auto v = (static_cast<float>(pixelCoord.y) +
                           m_unifDistribution(generator)) /
                          (m_imageSize.y - 1);
+          // TODO: texture mapping
+          uint32_t textureIdx =
+              pixelCoord.x * (textureWidth / m_imageSize.x) +
+              pixelCoord.y * textureWidth * (textureHeight / m_imageSize.y);
+          glm::vec3 textureColor =
+              glm::vec3(texture[4 * (textureIdx) + 0] / 255.0f,
+                        texture[4 * (textureIdx) + 1] / 255.0f,
+                        texture[4 * (textureIdx) + 2] / 255.0f);
           Ray r = m_camera->NewRay(u, v);
           pixel_color += ShootRay(r, maxRayDepth);
+          pixel_color += textureColor;
         }
         WritePixelToBuffer(pixelCoord.x, pixelCoord.y, samplesPerPixel,
                            pixel_color);
