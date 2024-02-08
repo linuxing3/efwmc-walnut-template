@@ -13,10 +13,6 @@
 #include <glm/fwd.hpp>
 #include <glm/gtx/hash.hpp>
 
-const std::string MODEL_PATH = RESOURCE_DIR "/fourareen.obj";
-const std::string TEXTURE_PATH = RESOURCE_DIR "/fourareen2k_albedo.png";
-const std::string EARTHMAP_PATH = RESOURCE_DIR "/earthmap.jpeg";
-
 namespace Utils {
 
 static uint32_t ConvertToRGBA(const glm::vec4 &color) {

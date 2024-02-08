@@ -10,39 +10,38 @@
 
 using namespace Walnut;
 
+const std::string MODEL_PATH = RESOURCE_DIR "/fourareen.obj";
+const std::string TEXTURE_PATH = RESOURCE_DIR "/fourareen2k_albedo.png";
 const std::string EARTHMAP_PATH = RESOURCE_DIR "/earthmap.jpeg";
+const std::string MOON_PATH = RESOURCE_DIR "/moon.jpeg";
 
 class RayTracerLayer : public Walnut::Layer {
 
 public:
   RayTracerLayer() : m_Camera(45.0f, 0.1f, 100.0f) {
 
-    EFWMC::Texture *image = new EFWMC::Texture(EARTHMAP_PATH);
+    auto *earthTexture = new EFWMC::Texture(EARTHMAP_PATH);
+    auto *moonTexture = new EFWMC::Texture(MOON_PATH);
 
-    Material &pinkSphere = m_Scene.Materials.emplace_back(image);
+    // material 0
+    Material &pinkSphere = m_Scene.Materials.emplace_back(earthTexture);
     pinkSphere.Roughness = 0.0f;
 
-    Material &blueSphere = m_Scene.Materials.emplace_back(image);
+    // material 1
+    Material &blueSphere = m_Scene.Materials.emplace_back(moonTexture);
     blueSphere.Roughness = 0.1f;
 
-    Material &orangeSphere = m_Scene.Materials.emplace_back(image);
+    // material 2
+    Material &orangeSphere = m_Scene.Materials.emplace_back(moonTexture);
     orangeSphere.Roughness = 0.1f;
     orangeSphere.EmissionColor = {1.0f, 0.5f, 0.0f};
-    orangeSphere.EmissionPower = 2.0f;
+    orangeSphere.EmissionPower = 0.1f;
 
     {
       Sphere sphere;
       sphere.Center = {0.0f, 0.0f, 0.0f};
-      sphere.Radius = 1.0f;
+      sphere.Radius = 1.5f;
       sphere.MaterialIndex = 0;
-      m_Scene.Spheres.push_back(sphere);
-    }
-
-    {
-      Sphere sphere;
-      sphere.Center = {2.0f, 0.0f, 0.0f};
-      sphere.Radius = 1.0f;
-      sphere.MaterialIndex = 2;
       m_Scene.Spheres.push_back(sphere);
     }
 
@@ -51,6 +50,14 @@ public:
       sphere.Center = {0.0f, -101.0f, 0.0f};
       sphere.Radius = 100.0f;
       sphere.MaterialIndex = 1;
+      m_Scene.Spheres.push_back(sphere);
+    }
+
+    {
+      Sphere sphere;
+      sphere.Center = {2.0f, 0.0f, 0.0f};
+      sphere.Radius = 0.5f;
+      sphere.MaterialIndex = 2;
       m_Scene.Spheres.push_back(sphere);
     }
   }
@@ -75,8 +82,16 @@ public:
     ImGui::End();
 
     ImGui::Begin("Scene");
+    ImGui::DragFloat3("Camera Position", glm::value_ptr(m_Camera.m_Position),
+                      0.1f);
+    ImGui::DragFloat3("Camera LookAt",
+                      glm::value_ptr(m_Camera.m_ForwardDirection), 0.1f);
+
+    // spheres control
     for (size_t i = 0; i < m_Scene.Spheres.size(); i++) {
       ImGui::PushID(i);
+
+      ImGui::Text("Sphere %zu", i);
 
       Sphere &sphere = m_Scene.Spheres[i];
       ImGui::DragFloat3("Position", glm::value_ptr(sphere.Center), 0.1f);
@@ -89,8 +104,11 @@ public:
       ImGui::PopID();
     }
 
+    // materials control
     for (size_t i = 0; i < m_Scene.Materials.size(); i++) {
       ImGui::PushID(i);
+
+      ImGui::Text("Material %zu", i);
 
       Material &material = m_Scene.Materials[i];
       ImGui::DragFloat("Roughness", &material.Roughness, 0.05f, 0.0f, 1.0f);
@@ -144,7 +162,7 @@ private:
   Renderer m_Renderer;
   Camera m_Camera;
   Scene m_Scene;
-  uint32_t m_ViewportWidth = 400, m_ViewportHeight = 400;
+  uint32_t m_ViewportWidth = 0, m_ViewportHeight = 0;
 
   float m_LastRenderTime = 0.0f;
 };
