@@ -1,9 +1,7 @@
 #pragma once
 
 #include "stb/stb_image.h"
-#include <cstdio>
 #include <glm/glm.hpp>
-#include <memory>
 #include <string>
 
 #include <vector>
@@ -14,7 +12,6 @@ struct Texture {
   uint8_t *Pixels = nullptr;
   float Width;
   float Height;
-  float Channels;
   float HOffset{0.0};
 
   Texture(){};
@@ -32,7 +29,6 @@ struct Texture {
     Pixels = stbi_load(path.c_str(), &width, &height, &channels, 4);
     Width = width;
     Height = height;
-    Channels = channels;
   }
 
   glm::vec3 GetAlbedo(float u, float v) {
