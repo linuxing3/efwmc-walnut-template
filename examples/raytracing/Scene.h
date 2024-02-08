@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stb/stb_image.h"
+#include <cstdio>
 #include <glm/glm.hpp>
 #include <memory>
 #include <string>
@@ -31,19 +32,38 @@ struct Texture {
     Pixels = stbi_load(path.c_str(), &width, &height, &channels, 4);
     Width = width;
     Height = height;
+#ifdef DEBUG_LOG
+    printf("Width: %2f, Height: %2f\n", Width, Height);
+    for (int i = 0; i < Width * Height; i++) {
+      printf("[");
+      printf("%hhu ", Pixels[4 * i]);
+      printf("%hhu ", Pixels[4 * i + 1]);
+      printf("%hhu ", Pixels[4 * i + 2]);
+      printf("%hhu ", Pixels[4 * i + 3]);
+      printf("]\n");
+    }
+#endif
     Channels = channels;
   }
 
   glm::vec3 GetAlbedo(float u, float v) {
-    float rot = u + HOffset;
-    if (rot > 1.0)
-      rot -= 1.0;
-    float uu = rot * Width;
+    // uu is the horizontal axis
+    float uu = u * Width;
+    // vv is the vertical axis
     float vv = (1.0 - v) * Height;
-    uint32_t textureIdx = 4 * (uu + floor(vv) * Width);
+    // textureIdx is the index of the pixel in the texture
+    uint32_t textureIdx = 4 * (floor(uu) + floor(vv) * Width);
+    // Albeto is the color of the pixel in the texture
     Albedo =
         glm::vec3(Pixels[textureIdx] / 255.0f, Pixels[textureIdx + 1] / 255.0f,
                   Pixels[textureIdx + 2] / 255.0f);
+#ifdef DEBUG_LOG
+    printf("[");
+    printf("%f ", Albedo.x);
+    printf("%f ", Albedo.y);
+    printf("%f ", Albedo.z);
+    printf("]\r");
+#endif
     return Albedo;
   }
 };

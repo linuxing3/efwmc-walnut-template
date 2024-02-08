@@ -60,29 +60,9 @@ void Renderer::OnResize(uint32_t width, uint32_t height) {
     m_ImageVerticalIter[i] = i;
 }
 
-Renderer::~Renderer() {
-  // TODO: texture sample
-}
+Renderer::~Renderer() {}
 
-Renderer::Renderer() {
-
-  // Load model
-  bool success = ResourceManager::loadGeometryFromObj(MODEL_PATH, m_VertexData);
-  if (!success) {
-    std::cerr << "Failed to load model" << std::endl;
-  }
-#ifdef DEBUG
-  for (int i = 0; i < m_VertexData.size(); i++) {
-    glm::vec3 textureColor = glm::vec3(m_VertexData[i].color[0] / 255.0f,
-                                       m_VertexData[i].color[1] / 255.0f,
-                                       m_VertexData[i].color[2] / 255.0f);
-    glm::vec3 position = glm::normalize(m_VertexData[i].position) * 0.5f + 0.5f;
-    printf("position: %f, %f, %f\n", position.x, position.y, position.z);
-    printf("color: %f, %f, %f\n", textureColor.x, textureColor.y,
-           textureColor.z);
-  }
-#endif
-}
+Renderer::Renderer() {}
 
 void Renderer::Render(const Scene &scene, const Camera &camera) {
   m_ActiveScene = &scene;
@@ -105,7 +85,7 @@ void Renderer::Render(const Scene &scene, const Camera &camera) {
             m_ImageHorizontalIter.end(), [this, y](uint32_t x) {
               uint32_t imageIndex = x + y * m_ViewportWidth;
               glm::vec4 color = PerPixel(x, y);
-              m_AccumulationData[imageIndex] += color;
+              m_AccumulationData[imageIndex] += (color);
 
               glm::vec4 accumulatedColor = m_AccumulationData[imageIndex];
               accumulatedColor /= (float)m_FrameIndex;
@@ -116,20 +96,6 @@ void Renderer::Render(const Scene &scene, const Camera &camera) {
             });
       });
 
-#ifdef USE_MODEL
-  // map m_VertexData
-  for (int i = 0; i < m_VertexData.size(); i++) {
-    glm::vec3 textureColor = glm::vec3(m_VertexData[i].color[0] / 255.0f,
-                                       m_VertexData[i].color[2] / 255.0f,
-                                       m_VertexData[i].color[1] / 255.0f);
-    glm::vec3 position = glm::normalize(m_VertexData[i].position) * 0.5f + 0.5f;
-    int x = position.x * m_ViewportWidth;
-    int y = position.y * m_ViewportHeight;
-    int imageIndex = x + y * m_ViewportWidth;
-    m_ImageData[imageIndex] =
-        Utils::ConvertToRGBA(glm::vec4(1.0f, 0.0, 1.0, 1.0f));
-  }
-#endif
 #else
 
   for (uint32_t y = 0; y < m_ViewportHeight; y++) {
@@ -167,17 +133,6 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) {
   ray.Direction =
       m_ActiveCamera->GetRayDirections()[x + y * m_FinalImage->GetWidth()];
 
-#define USE_UV
-#ifdef USE_UV
-#else
-  auto [texture, textureWidth, textureHeight] = m_TextureData;
-  uint32_t textureIdx = x * (textureWidth / m_ViewportWidth) +
-                        y * textureWidth * (textureHeight / m_ViewportHeight);
-  glm::vec3 textureColor = glm::vec3(texture[4 * (textureIdx) + 0] / 255.0f,
-                                     texture[4 * (textureIdx) + 1] / 255.0f,
-                                     texture[4 * (textureIdx) + 2] / 255.0f);
-#endif
-
   glm::vec3 light(0.0f);
 
   int bounces = 5;
@@ -190,12 +145,10 @@ glm::vec4 Renderer::PerPixel(uint32_t x, uint32_t y) {
     const Sphere &sphere = m_ActiveScene->Spheres[payload.ObjectIndex];
     const Material &material = m_ActiveScene->Materials[sphere.MaterialIndex];
 
-    light += material.GetEmission(); // earth map as mipmap of sphere
+    light += material.GetImage()->GetAlbedo(payload.u, payload.v) +
+             material.GetEmission(); // get Emisson from material
 
     ray.Origin = payload.WorldPosition + payload.WorldNormal * 1e-4f;
-    // ray.Direction = glm::reflect(ray.Direction,
-    //	payload.WorldNormal + material.Roughness * Walnut::Random::Vec3(-0.5f,
-    // 0.5f));
     ray.Direction =
         glm::normalize(payload.WorldNormal + Walnut::Random::InUnitSphere());
   }
@@ -254,19 +207,17 @@ Renderer::HitPayload Renderer::ClosestHit(const Ray &ray, float hitDistance,
 
   const Sphere &closestSphere = m_ActiveScene->Spheres[objectIndex];
 
-  glm::vec3 origin = ray.Origin - closestSphere.Center;
-  payload.WorldPosition = origin + ray.Direction * hitDistance;
-  // FIXME: this is not normal
-  /* payload.WorldNormal = glm::normalize(payload.WorldPosition); */
+  glm::vec3 origin =
+      ray.Origin -
+      closestSphere.Center; // new origin is bounce point position vector
+  payload.WorldPosition =
+      origin + ray.Direction * hitDistance; // bounce point normal vector
   payload.WorldNormal =
-      (payload.WorldPosition - closestSphere.Center) / closestSphere.Radius;
-
-  auto [_u, _v] = payload.GetUV(payload.WorldPosition - closestSphere.Center);
-
-  payload.u = _u;
-  payload.v = _v;
-
+      glm::normalize(payload.WorldPosition); // bounce point unit normal vector
   payload.WorldPosition += closestSphere.Center;
+  if (!payload.GetUVOnSphere(
+          payload.WorldPosition)) // Get UV of bounce point on sphere
+    std::perror("Failed to get UV coordinates");
 
   return payload;
 }

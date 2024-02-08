@@ -36,19 +36,23 @@ private:
     float HitDistance;
     glm::vec3 WorldPosition;
     glm::vec3 WorldNormal;
-    uint32_t u;
-    uint32_t v;
+    float u;
+    float v;
 
     int ObjectIndex;
 
-    std::tuple<float, float> GetUV(glm::vec3 hitPosition) {
-      glm::vec3 n = glm::normalize(hitPosition);
+    bool GetUVOnSphere(glm::vec3 hitPointWorldPosition) {
+      glm::vec3 n = glm::normalize(hitPointWorldPosition);
       float x = n.x;
       float y = n.y;
       float z = n.z;
-      float u = std::atan2(x, z) / (2.0 * 3.1415926) + 0.5;
-      float v = y * 0.5 + 0.5;
-      return std::tuple<float, float>(u, v);
+      u = atan2(x, z) / (2.0 * 3.1415926) + 0.5;
+      v = y * 0.5 + 0.5;
+
+      if (u <= 1.0 && u >= 0.0 && v <= 1.0 && v >= 0.0) {
+        return true;
+      }
+      return false;
     }
   };
 
