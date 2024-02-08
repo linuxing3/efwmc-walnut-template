@@ -32,17 +32,6 @@ struct Texture {
     Pixels = stbi_load(path.c_str(), &width, &height, &channels, 4);
     Width = width;
     Height = height;
-#ifdef DEBUG_LOG
-    printf("Width: %2f, Height: %2f\n", Width, Height);
-    for (int i = 0; i < Width * Height; i++) {
-      printf("[");
-      printf("%hhu ", Pixels[4 * i]);
-      printf("%hhu ", Pixels[4 * i + 1]);
-      printf("%hhu ", Pixels[4 * i + 2]);
-      printf("%hhu ", Pixels[4 * i + 3]);
-      printf("]\n");
-    }
-#endif
     Channels = channels;
   }
 
@@ -57,13 +46,6 @@ struct Texture {
     Albedo =
         glm::vec3(Pixels[textureIdx] / 255.0f, Pixels[textureIdx + 1] / 255.0f,
                   Pixels[textureIdx + 2] / 255.0f);
-#ifdef DEBUG_LOG
-    printf("[");
-    printf("%f ", Albedo.x);
-    printf("%f ", Albedo.y);
-    printf("%f ", Albedo.z);
-    printf("]\r");
-#endif
     return Albedo;
   }
 };
@@ -71,7 +53,6 @@ struct Texture {
 
 struct Material {
   EFWMC::Texture *Image;
-  glm::vec3 Albedo{1.0f};
   float Roughness = 1.0f;
   float Metallic = 0.0f;
   glm::vec3 EmissionColor{0.0f};

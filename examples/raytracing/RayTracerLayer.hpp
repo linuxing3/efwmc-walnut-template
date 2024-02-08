@@ -20,17 +20,14 @@ public:
     EFWMC::Texture *image = new EFWMC::Texture(EARTHMAP_PATH);
 
     Material &pinkSphere = m_Scene.Materials.emplace_back(image);
-    pinkSphere.Albedo = {1.0f, 0.0f, 1.0f};
     pinkSphere.Roughness = 0.0f;
 
     Material &blueSphere = m_Scene.Materials.emplace_back(image);
-    blueSphere.Albedo = {0.2f, 0.3f, 1.0f};
     blueSphere.Roughness = 0.1f;
 
     Material &orangeSphere = m_Scene.Materials.emplace_back(image);
-    orangeSphere.Albedo = {0.8f, 0.5f, 0.2f};
     orangeSphere.Roughness = 0.1f;
-    orangeSphere.EmissionColor = orangeSphere.Albedo;
+    orangeSphere.EmissionColor = {1.0f, 0.5f, 0.0f};
     orangeSphere.EmissionPower = 2.0f;
 
     {
@@ -96,7 +93,6 @@ public:
       ImGui::PushID(i);
 
       Material &material = m_Scene.Materials[i];
-      ImGui::ColorEdit3("Albedo", glm::value_ptr(material.Albedo));
       ImGui::DragFloat("Roughness", &material.Roughness, 0.05f, 0.0f, 1.0f);
       ImGui::DragFloat("Metallic", &material.Metallic, 0.05f, 0.0f, 1.0f);
       ImGui::ColorEdit3("Emission Color",
