@@ -9,5 +9,5 @@ set_languages('c++20')
 
 set_allowedplats('windows', 'linux', 'macosx')
 
-includes('vendor')
 includes('examples')
+includes('vendor')

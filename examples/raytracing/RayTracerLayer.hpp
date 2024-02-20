@@ -1,4 +1,5 @@
 #pragma once
+#include "Application.h"
 #include "Layer.h"
 #include "Walnut/Timer.h"
 
@@ -60,6 +61,7 @@ public:
       sphere.MaterialIndex = 2;
       m_Scene.Spheres.push_back(sphere);
     }
+    Application::Get()->QueueEvent([]() { Image::InitModel(945, 1028); });
   }
 
   virtual void OnUpdate(float ts) override {
