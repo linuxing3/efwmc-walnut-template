@@ -61,7 +61,9 @@ public:
       sphere.MaterialIndex = 2;
       m_Scene.Spheres.push_back(sphere);
     }
-    Application::Get()->QueueEvent([]() { Image::InitModel(945, 1028); });
+    Application::Get()->QueueEvent([]() { 
+        Image::InitModel(945, 1028); 
+    });
   }
 
   virtual void OnUpdate(float ts) override {
